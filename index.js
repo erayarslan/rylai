@@ -76,7 +76,7 @@ var Rylai = (function (opts) {
       return params;
     },
     _extractPath: function () {
-      return pushState ? location.pathname.substr(root.length) : location.hash.substr(1);
+      return pushState ? location.pathname.substr(root.length == 1 ? 0 : root.length) : location.hash.substr(1);
     },
     catch: function (path) {
       var req = new Request(this);
