@@ -5,8 +5,12 @@ var _u = require("./utils");
 
 var pathToRegexp = require('path-to-regexp');
 
-var Rylai = (function () {
+var Rylai = (function (opts) {
   window.on = window.addEventListener;
+
+  var _opts = opts || {};
+  var root = _opts.root || "/";
+  var pushState = _opts.pushState || false;
 
   var settings = {};
   var routes = {};
@@ -71,18 +75,8 @@ var Rylai = (function () {
 
       return params;
     },
-    getPath: function () {
-      var path = this.decodeFragment(
-        this.location.pathname + this.getSearch()
-      ).slice(this.root.length - 1);
-      return path.charAt(0) === '/' ? path.slice(1) : path;
-    },
-    getSearch: function () {
-      var match = this.location.href.replace(/#.*/, '').match(/\?.+/);
-      return match ? match[0] : '';
-    },
-    decodeFragment: function (fragment) {
-      return decodeURI(fragment.replace(/%25/g, '%2525'));
+    _extractPath: function () {
+      return pushState ? location.pathname.substr(root.length) : location.hash.substr(1);
     },
     catch: function (path) {
       var req = new Request(this);
@@ -102,12 +96,12 @@ var Rylai = (function () {
     },
     response: _u.nothing,
     listen: function (callback) {
-      window.on("hashchange", function (e) {
-        app.catch(location.hash.substr(1));
-      });
-
-      app.catch(location.hash.substr(1));
-
+      app.catch(app._extractPath());
+      if (pushState) {
+        window.on("hashchange", function (e) {
+          app.catch(app._extractPath());
+        });
+      }
       (this.response && callback ? callback : _u.nothing)();
     },
     locals: locals

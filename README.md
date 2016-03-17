@@ -1,5 +1,5 @@
 # rylai
-> please check out 'test.html' :)
+> please check 'test' directory :)
 
 ## about
-> still virgin! do not use for production things
+> still virgin! do not use for production things :>
