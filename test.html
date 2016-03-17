@@ -1,0 +1,20 @@
+<html>
+<head>
+
+</head>
+<body>
+<script src="rylai.js"></script>
+<script>
+    var app = Rylai();
+    app.use(function (req, res, next) {
+        console.log("before!");
+        next();
+    });
+
+    app.route("/hello/:keyword", function (req, res) {
+        console.log(req.params);
+    });
+    app.listen();
+</script>
+</body>
+</html>
