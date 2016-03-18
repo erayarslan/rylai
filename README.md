@@ -12,6 +12,12 @@ $ npm install rylaijs
 $ npm run build
 ```
 
+## pushState
+
+```sh
+$ npm run pushState
+```
+
 ## license
 
 MIT.

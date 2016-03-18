@@ -5,7 +5,8 @@
   "version": "0.0.3",
   "author": "eray <relfishere@gmail.com>",
   "scripts": {
-    "build": "browserify src/rylai.js -o build/rylai.js"
+    "build": "browserify src/rylai.js -o build/rylai.js",
+    "pushState": "node pushState.js"
   },
   "dependencies": {
     "path-to-regexp": "1.2.1"
