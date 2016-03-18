@@ -2,7 +2,7 @@
   "name": "rylaijs",
   "description": "spachcock based cliend-side routing thing",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "eray <relfishere@gmail.com>",
   "scripts": {
     "build": "browserify src/rylai.js -o build/rylai.js"
