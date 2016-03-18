@@ -1,118 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Request = require("./request");
-var Response = require("./response");
-
-var _u = require("./utils");
-
-var pathToRegexp = require('path-to-regexp');
-
-var Rylai = (function (opts) {
-  window.on = window.addEventListener;
-
-  var _opts = opts || {};
-  var root = _opts.root || "/";
-  var pushState = _opts.pushState || false;
-
-  var settings = {};
-  var routes = {};
-  var globals = [];
-  var locals = {};
-  var app = {
-    get: function () {
-      return settings.hasOwnProperty(key) ? settings[key] : undefined;
-    },
-    set: function (key, value) {
-      settings[key] = value;
-    },
-    enable: function (key) {
-      settings[key] = true;
-    },
-    disable: function (key) {
-      settings[key] = false;
-    },
-    enabled: function (key) {
-      return settings[key] === true;
-    },
-    disabled: function (key) {
-      return settings[key] === false;
-    },
-    use: function (f) {
-      globals.push(f);
-    },
-    route: function () {
-      if (arguments.length > 1) {
-        var keys = [];
-        var args = Array.prototype.slice.call(arguments);
-        var path = args.shift();
-        var callbacks = globals.concat(args);
-
-        routes[path] = {
-          r: pathToRegexp(path, keys),
-          k: keys,
-          f: function (req, res) {
-            var next = function (i) {
-              return i != callbacks.length ? function () {
-                callbacks[i](req, res, next(i + 1));
-              } : _u.nothing
-            };
-
-            next(0)(req, res);
-          }
-        };
-      }
-    },
-    _extract: function (route, path) {
-      var m = route.r.exec(path);
-      var params = {};
-
-      for (var i = 1; i < m.length; i++) {
-        var prop = route.k[i - 1].name;
-        var val = _u.DecodeParam(m[i]);
-
-        if (!!val || !(_u.hasOwnProperty.call(params, prop))) {
-          params[prop] = val;
-        }
-      }
-
-      return params;
-    },
-    _extractPath: function () {
-      return pushState ? location.pathname.substr(root.length == 1 ? 0 : root.length) : location.hash.substr(1);
-    },
-    catch: function (path) {
-      var req = new Request(this);
-      var res = new Response(this);
-
-      for (var key in routes) {
-        var route = routes[key];
-        if (route.r.test(path)) {
-          var params = this._extract(route, path);
-          req.url = path;
-          req.params = params;
-          req.route = route;
-          route.f(req, res);
-          break;
-        }
-      }
-    },
-    response: _u.nothing,
-    listen: function (callback) {
-      app.catch(app._extractPath());
-      if (pushState) {
-        window.on("hashchange", function (e) {
-          app.catch(app._extractPath());
-        });
-      }
-      (this.response && callback ? callback : _u.nothing)();
-    },
-    locals: locals
-  };
-
-  return app;
-});
-
-window.Rylai = Rylai;
-},{"./request":4,"./response":5,"./utils":6,"path-to-regexp":2}],2:[function(require,module,exports){
 var isarray = require('isarray')
 
 /**
@@ -504,19 +390,19 @@ function pathToRegexp (path, keys, options) {
   return stringToRegexp(path, keys, options)
 }
 
-},{"isarray":3}],3:[function(require,module,exports){
+},{"isarray":2}],2:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 var Request = function (spachcock) {
   this.app = spachcock;
   return this;
 };
 
 module.exports = Request;
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var Response = function (spachcock) {
   this.app = spachcock;
   return this;
@@ -528,7 +414,234 @@ Response.prototype.redirect = function (path) {
 };
 
 module.exports = Response;
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
+var Request = require("./request");
+var Response = require("./response");
+
+var _u = require("./utils");
+
+var pathToRegexp = require('path-to-regexp');
+
+var Rylai = (function (opts) {
+  var _opts = opts || {};
+  _opts.root = _opts.root || "/";
+  _opts.pushState = _opts.pushState || false;
+
+  var settings = {};
+  var routes = {};
+  var globals = [];
+  var locals = {};
+  var app = {
+    get: function () {
+      return settings.hasOwnProperty(key) ? settings[key] : undefined;
+    },
+    set: function (key, value) {
+      settings[key] = value;
+    },
+    enable: function (key) {
+      settings[key] = true;
+    },
+    disable: function (key) {
+      settings[key] = false;
+    },
+    enabled: function (key) {
+      return settings[key] === true;
+    },
+    disabled: function (key) {
+      return settings[key] === false;
+    },
+    use: function (f) {
+      globals.push(f);
+    },
+    route: function () {
+      if (arguments.length > 1) {
+        var keys = [];
+        var args = Array.prototype.slice.call(arguments);
+        var path = args.shift();
+        var callbacks = globals.concat(args);
+
+        routes[path] = {
+          r: pathToRegexp(path, keys),
+          k: keys,
+          f: function (req, res) {
+            var next = function (i) {
+              return i != callbacks.length ? function () {
+                callbacks[i](req, res, next(i + 1));
+              } : _u.nothing
+            };
+
+            next(0)(req, res);
+          }
+        };
+      }
+    },
+    _extract: function (route, path) {
+      var m = route.r.exec(path);
+      var params = {};
+
+      for (var i = 1; i < m.length; i++) {
+        var prop = route.k[i - 1].name;
+        var val = _u.DecodeParam(m[i]);
+
+        if (!!val || !(_u.hasOwnProperty.call(params, prop))) {
+          params[prop] = val;
+        }
+      }
+
+      return params;
+    },
+    catch: function (path) {
+      var req = new Request(this);
+      var res = new Response(this);
+
+      for (var key in routes) {
+        var route = routes[key];
+        if (route.r.test(path)) {
+          var params = this._extract(route, path);
+          req.url = path;
+          req.params = params;
+          req.route = route;
+          route.f(req, res);
+          break;
+        }
+      }
+    },
+    response: _u.nothing,
+    getFragment: function (fragment) {
+      if (fragment == null) {
+        if (this._usePushState || !this._wantsHashChange) {
+          fragment = this.getPath();
+        } else {
+          fragment = this.getHash();
+        }
+      }
+      return fragment.replace(/^[#\/]|\s+$/g, '');
+    },
+    getHash: function (target) {
+      var match = (target || window).location.href.match(/#(.*)$/);
+      return match ? match[1] : '';
+    },
+    getSearch: function () {
+      var match = location.href.replace(/#.*/, '').match(/\?.+/);
+      return match ? match[0] : '';
+    },
+    decodeFragment: function (fragment) {
+      return decodeURI(fragment.replace(/%25/g, '%2525'));
+    },
+    getPath: function () {
+      var path = this.decodeFragment(
+        location.pathname + this.getSearch()
+      ).slice(this.root.length - 1);
+      return path.charAt(0) === '/' ? path.slice(1) : path;
+    },
+    atRoot: function () {
+      var path = location.pathname.replace(/[^\/]$/, '$&/');
+      return path === this.root && !this.getSearch();
+    },
+    checkUrl: function (e) {
+      var current = app.getFragment();
+
+      if (current === this.fragment && this.iframe) {
+        current = this.getHash(this.iframe.contentWindow);
+      }
+
+      if (current === this.fragment) return false;
+      if (this.iframe) this.catch(current);
+      app.loadUrl();
+    },
+    loadUrl: function (fragment) {
+      if (!this.matchRoot()) return false;
+      fragment = this.fragment = this.getFragment(fragment);
+      this.catch(fragment);
+    },
+    matchRoot: function () {
+      var path = this.decodeFragment(location.pathname);
+      var rootPath = path.slice(0, this.root.length - 1) + '/';
+      return rootPath === this.root;
+    },
+    start: function (options) {
+      if (History.started) throw new Error('Backbone.history has already been started');
+      History.started = true;
+
+      this.options = _opts;
+      this.root = this.options.root;
+      this._wantsHashChange = this.options.hashChange !== false;
+      this._hasHashChange = 'onhashchange' in window && (document.documentMode === void 0 || document.documentMode > 7);
+      this._useHashChange = this._wantsHashChange && this._hasHashChange;
+      this._wantsPushState = !!this.options.pushState;
+      this._hasPushState = !!(window.history && window.history.pushState);
+      this._usePushState = this._wantsPushState && this._hasPushState;
+      this.fragment = this.getFragment();
+
+      this.root = ('/' + this.root + '/').replace(/^\/+|\/+$/g, '/');
+
+      if (this._wantsHashChange && this._wantsPushState) {
+        if (!this._hasPushState && !this.atRoot()) {
+          var rootPath = this.root.slice(0, -1) || '/';
+          location.replace(rootPath + '#' + this.getPath());
+          return true;
+        } else if (this._hasPushState && this.atRoot()) {
+          this.catch(this.getHash());
+        }
+      }
+
+      if (!this._hasHashChange && this._wantsHashChange && !this._usePushState) {
+        this.iframe = document.createElement('iframe');
+        this.iframe.src = 'javascript:0';
+        this.iframe.style.display = 'none';
+        this.iframe.tabIndex = -1;
+        var body = document.body;
+        var iWindow = body.insertBefore(this.iframe, body.firstChild).contentWindow;
+        iWindow.document.open();
+        iWindow.document.close();
+        iWindow.location.hash = '#' + this.fragment;
+      }
+
+      var addEventListener = window.addEventListener || function (eventName, listener) {
+          return attachEvent('on' + eventName, listener);
+        };
+
+      if (this._usePushState) {
+        addEventListener('popstate', this.checkUrl, false);
+      } else if (this._useHashChange && !this.iframe) {
+        addEventListener('hashchange', this.checkUrl, false);
+      } else if (this._wantsHashChange) {
+        this._checkUrlInterval = setInterval(this.checkUrl, this.interval);
+      }
+
+      if (!this.options.silent) return this.loadUrl();
+    },
+    stop: function () {
+      var removeEventListener = window.removeEventListener || function (eventName, listener) {
+          return detachEvent('on' + eventName, listener);
+        };
+
+      if (this._usePushState) {
+        removeEventListener('popstate', this.checkUrl, false);
+      } else if (this._useHashChange && !this.iframe) {
+        removeEventListener('hashchange', this.checkUrl, false);
+      }
+
+      if (this.iframe) {
+        document.body.removeChild(this.iframe);
+        this.iframe = null;
+      }
+
+      if (this._checkUrlInterval) clearInterval(this._checkUrlInterval);
+      History.started = false;
+    },
+    listen: function (next) {
+      this.start(_opts);
+      (!!next ? next : _u.nothing)();
+    },
+    locals: locals
+  };
+
+  return app;
+});
+
+window.Rylai = Rylai;
+},{"./request":3,"./response":4,"./utils":6,"path-to-regexp":1}],6:[function(require,module,exports){
 module.exports = {
   hasOwnProperty: Object.prototype.hasOwnProperty,
   /**
@@ -554,4 +667,4 @@ module.exports = {
   nothing: function () {
   }
 };
-},{}]},{},[1]);
+},{}]},{},[5]);

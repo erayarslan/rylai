@@ -1,0 +1,18 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/build/rylai.js"></script>
+<script>
+    var app = Rylai({root: "/", pushState: true});
+    app.use(function (req, res, next) {
+        console.log("before!");
+        next();
+    });
+    app.route("hello/:keyword", function (req, res) {
+        console.log(req.params.keyword);
+    });
+    app.listen();
+</script>
+</body>
+</html>

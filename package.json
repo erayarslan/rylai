@@ -2,9 +2,12 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
-    "build": "browserify index.js -o rylai.js"
+    "build": "browserify src/rylai.js -o build/rylai.js"
   },
   "dependencies": {
     "path-to-regexp": "1.2.1"
+  },
+  "devDependencies": {
+    "express": "4.13.4"
   }
 }
