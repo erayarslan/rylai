@@ -1,8 +1,6 @@
 var Request = require("./request");
 var Response = require("./response");
-
 var _u = require("./utils");
-
 var pathToRegexp = require('path-to-regexp');
 
 var Rylai = (function (opts) {
@@ -14,6 +12,7 @@ var Rylai = (function (opts) {
   var routes = {};
   var globals = [];
   var locals = {};
+  var started = false;
   var app = {
     get: function () {
       return settings.hasOwnProperty(key) ? settings[key] : undefined;
@@ -64,7 +63,7 @@ var Rylai = (function (opts) {
 
       for (var i = 1; i < m.length; i++) {
         var prop = route.k[i - 1].name;
-        var val = _u.DecodeParam(m[i]);
+        var val = _u.decodeParam(m[i]);
 
         if (!!val || !(_u.hasOwnProperty.call(params, prop))) {
           params[prop] = val;
@@ -95,37 +94,26 @@ var Rylai = (function (opts) {
         if (this._usePushState || !this._wantsHashChange) {
           fragment = this.getPath();
         } else {
-          fragment = this.getHash();
+          fragment = _u.getHash();
         }
       }
       return fragment.replace(/^[#\/]|\s+$/g, '');
     },
-    getHash: function (target) {
-      var match = (target || window).location.href.match(/#(.*)$/);
-      return match ? match[1] : '';
-    },
-    getSearch: function () {
-      var match = location.href.replace(/#.*/, '').match(/\?.+/);
-      return match ? match[0] : '';
-    },
-    decodeFragment: function (fragment) {
-      return decodeURI(fragment.replace(/%25/g, '%2525'));
-    },
     getPath: function () {
-      var path = this.decodeFragment(
-        location.pathname + this.getSearch()
+      var path = _u.decodeFragment(
+        location.pathname + _u.getSearch()
       ).slice(this.root.length - 1);
       return path.charAt(0) === '/' ? path.slice(1) : path;
     },
     atRoot: function () {
       var path = location.pathname.replace(/[^\/]$/, '$&/');
-      return path === this.root && !this.getSearch();
+      return path === this.root && !_u.getSearch();
     },
     checkUrl: function (e) {
       var current = app.getFragment();
 
       if (current === this.fragment && this.iframe) {
-        current = this.getHash(this.iframe.contentWindow);
+        current = _u.getHash(this.iframe.contentWindow);
       }
 
       if (current === this.fragment) return false;
@@ -138,13 +126,13 @@ var Rylai = (function (opts) {
       this.catch(fragment);
     },
     matchRoot: function () {
-      var path = this.decodeFragment(location.pathname);
+      var path = _u.decodeFragment(location.pathname);
       var rootPath = path.slice(0, this.root.length - 1) + '/';
       return rootPath === this.root;
     },
     start: function (options) {
-      if (History.started) throw new Error('Backbone.history has already been started');
-      History.started = true;
+      if (started) throw new Error('history has already been started');
+      started = true;
 
       this.options = _opts;
       this.root = this.options.root;
@@ -164,7 +152,7 @@ var Rylai = (function (opts) {
           location.replace(rootPath + '#' + this.getPath());
           return true;
         } else if (this._hasPushState && this.atRoot()) {
-          this.catch(this.getHash());
+          this.catch(_u.getHash());
         }
       }
 
@@ -211,11 +199,11 @@ var Rylai = (function (opts) {
       }
 
       if (this._checkUrlInterval) clearInterval(this._checkUrlInterval);
-      History.started = false;
+      started = false;
     },
     listen: function (next) {
-      this.start(_opts);
       (!!next ? next : _u.nothing)();
+      this.start(_opts);
     },
     locals: locals
   };

@@ -5,6 +5,7 @@
 <script src="build/rylai.js"></script>
 <script>
     var app = Rylai({root: "/"});
+
     app.use(function (req, res, next) {
         console.log("global!");
         next();
@@ -19,7 +20,10 @@
         console.log("hi!");
         console.log(req.params);
     });
-    app.listen();
+
+    app.listen(function () {
+        console.log("started!");
+    });
 </script>
 </body>
 </html>

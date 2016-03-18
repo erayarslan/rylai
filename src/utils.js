@@ -4,7 +4,7 @@ module.exports = {
    * @param {String} val - Value.
    * @returns {String}
    */
-  DecodeParam: function (val) {
+  decodeParam: function (val) {
     if (typeof val !== 'string' || val.length === 0) {
       return val;
     }
@@ -21,5 +21,16 @@ module.exports = {
     }
   },
   nothing: function () {
+  },
+  getHash: function (target) {
+    var match = (target || window).location.href.match(/#(.*)$/);
+    return match ? match[1] : '';
+  },
+  decodeFragment: function (fragment) {
+    return decodeURI(fragment.replace(/%25/g, '%2525'));
+  },
+  getSearch: function () {
+    var match = location.href.replace(/#.*/, '').match(/\?.+/);
+    return match ? match[0] : '';
   }
 };
