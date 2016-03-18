@@ -3,6 +3,7 @@
   "description": "spachcock based cliend-side routing thing",
   "private": true,
   "version": "0.0.1",
+  "author": "eray <relfishere@gmail.com>",
   "scripts": {
     "build": "browserify src/rylai.js -o build/rylai.js"
   },
@@ -11,5 +12,21 @@
   },
   "devDependencies": {
     "express": "4.13.4"
-  }
+  },
+  "keywords": [
+    "browser",
+    "spachcock",
+    "express",
+    "route",
+    "router",
+    "routing",
+    "controller",
+    "library"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:erayarslan/rylai.git"
+  },
+  "license": "mit",
+  "main": "./src/rylai.js"
 }
