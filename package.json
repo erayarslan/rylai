@@ -1,4 +1,6 @@
 {
+  "name": "rylaijs",
+  "description": "spachcock based cliend-side routing thing",
   "private": true,
   "version": "0.0.1",
   "scripts": {

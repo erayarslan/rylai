@@ -1,5 +1,17 @@
-# rylai
-> please check 'test' directory :)
+[![NPM](https://nodei.co/npm/rylaijs.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/rylaijs/)
 
-## about
-> still virgin! do not use for production things :>
+## install
+
+```sh
+$ npm install rylaijs
+```
+
+## build
+
+```sh
+$ npm run build
+```
+
+## license
+
+MIT.
