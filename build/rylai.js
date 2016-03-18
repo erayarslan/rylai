@@ -409,7 +409,7 @@ var Response = function (spachcock) {
 };
 
 Response.prototype.redirect = function (path) {
-  this.app.handle(path);
+  this.app.catch(path);
   return this;
 };
 

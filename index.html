@@ -2,15 +2,22 @@
 <head>
 </head>
 <body>
-<script src="/build/rylai.js"></script>
+<script src="build/rylai.js"></script>
 <script>
-    var app = Rylai({root: "/", pushState: true});
+    var app = Rylai({root: "/"});
     app.use(function (req, res, next) {
-        console.log("before!");
+        console.log("global!");
         next();
     });
-    app.route("hello/:keyword", function (req, res) {
-        console.log(req.params.keyword);
+
+    var example = function (req, res, next) {
+        console.log("middleware!");
+        next();
+    };
+
+    app.route("hello/:keyword", example, function (req, res) {
+        console.log("hi!");
+        console.log(req.params);
     });
     app.listen();
 </script>
