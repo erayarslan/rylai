@@ -1,5 +1,3 @@
-var Request = require("./request");
-var Response = require("./response");
 var _u = require("./utils");
 var pathToRegexp = require('path-to-regexp');
 
@@ -73,16 +71,20 @@ var Rylai = (function (opts) {
       return params;
     },
     catch: function (path) {
-      var req = new Request(this);
-      var res = new Response(this);
+      var req = {};
+      var res = {};
 
       for (var key in routes) {
         var route = routes[key];
         if (route.r.test(path)) {
           var params = this._extract(route, path);
+          req.app = this;
           req.url = path;
           req.params = params;
           req.route = route;
+
+          res.app = this;
+
           route.f(req, res);
           break;
         }
@@ -182,6 +184,48 @@ var Rylai = (function (opts) {
 
       if (!this.options.silent) return this.loadUrl();
     },
+    _updateHash: function (location, fragment, replace) {
+      if (replace) {
+        var href = location.href.replace(/(javascript:|#).*$/, '');
+        location.replace(href + '#' + fragment);
+      } else {
+        location.hash = '#' + fragment;
+      }
+    },
+    redirect: function (fragment, options) {
+      if (!started) return false;
+      if (!options || options === true) options = {trigger: !!options};
+
+      fragment = this.getFragment(fragment || '');
+
+      var rootPath = this.root;
+      if (fragment === '' || fragment.charAt(0) === '?') {
+        rootPath = rootPath.slice(0, -1) || '/';
+      }
+      var url = rootPath + fragment;
+
+      fragment = _u.decodeFragment(fragment.replace(/#.*$/, ''));
+
+      if (this.fragment === fragment) return;
+      this.fragment = fragment;
+      if (this._usePushState) {
+        this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+      } else if (this._wantsHashChange) {
+        this._updateHash(location, fragment, options.replace);
+        if (this.iframe && fragment !== this.getHash(this.iframe.contentWindow)) {
+          var iWindow = this.iframe.contentWindow;
+          if (!options.replace) {
+            iWindow.document.open();
+            iWindow.document.close();
+          }
+
+          this._updateHash(iWindow.location, fragment, options.replace);
+        }
+      } else {
+        return this.location.assign(url);
+      }
+      if (options.trigger) return this.loadUrl(fragment);
+    },
     stop: function () {
       var removeEventListener = window.removeEventListener || function (eventName, listener) {
           return detachEvent('on' + eventName, listener);
@@ -204,6 +248,10 @@ var Rylai = (function (opts) {
     listen: function (next) {
       (!!next ? next : _u.nothing)();
       this.start(_opts);
+    },
+    unlisten: function (next) {
+      (!!next ? next : _u.nothing)();
+      this.stop();
     },
     locals: locals
   };
